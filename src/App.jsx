@@ -29,7 +29,7 @@ export default function App() {
 
     const semesterCgpa = weightedSum / totalCredits;
     const cumulativeCgpa =
-      (previousCgpas.reduce((a, b) => a + b, 0) + semesterCgpa) / 5;
+      (previousCgpas.reduce((a, b) => a + b, 0) + semesterCgpa) / 6;
 
     setResult({
       totalCredits,
