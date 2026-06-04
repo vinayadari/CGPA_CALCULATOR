@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const subjects = {
   "Data Mining and Machine Learning": 3,
@@ -13,9 +13,38 @@ const subjects = {
 };
 
 export default function App() {
-  const [grades, setGrades] = useState({});
-  const [previousCgpas, setPreviousCgpas] = useState([0, 0, 0, 0, 0]);
-  const [result, setResult] = useState(null);
+  const [grades, setGrades] = useState(() => {
+    const saved = localStorage.getItem("grades");
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  const [previousCgpas, setPreviousCgpas] = useState(() => {
+    const saved = localStorage.getItem("previousCgpas");
+    return saved ? JSON.parse(saved) : [0, 0, 0, 0, 0];
+  });
+
+  const [result, setResult] = useState(() => {
+    const saved = localStorage.getItem("result");
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("grades", JSON.stringify(grades));
+  }, [grades]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "previousCgpas",
+      JSON.stringify(previousCgpas)
+    );
+  }, [previousCgpas]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "result",
+      JSON.stringify(result)
+    );
+  }, [result]);
 
   const calculateCGPA = () => {
     let totalCredits = 0;
@@ -28,8 +57,11 @@ export default function App() {
     });
 
     const semesterCgpa = weightedSum / totalCredits;
+
     const cumulativeCgpa =
-      (previousCgpas.reduce((a, b) => a + b, 0) + semesterCgpa) / 6;
+      (previousCgpas.reduce((a, b) => a + b, 0) +
+        semesterCgpa) /
+      6;
 
     setResult({
       totalCredits,
@@ -83,7 +115,8 @@ export default function App() {
           opacity: 0.7;
         }
 
-        select, input {
+        select,
+        input {
           background: #020617;
           border: 1px solid #334155;
           color: #e5e7eb;
@@ -120,64 +153,116 @@ export default function App() {
       <div className="container">
         <h1>CGPA Calculator</h1>
 
-        {/* Subjects */}
         <div className="card">
           <h2>Subjects</h2>
-          {Object.entries(subjects).map(([subject, credits]) => (
-            <div className="row" key={subject}>
-              <div className="subject">{subject}</div>
-              <div className="credits">{credits}</div>
-              <select
-                onChange={(e) =>
-                  setGrades({
-                    ...grades,
-                    [subject]: Number(e.target.value),
-                  })
-                }
+
+          {Object.entries(subjects).map(
+            ([subject, credits]) => (
+              <div
+                className="row"
+                key={subject}
               >
-                <option value="">Grade</option>
-                {[...Array(10)].map((_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    {i + 1}
+                <div className="subject">
+                  {subject}
+                </div>
+
+                <div className="credits">
+                  {credits}
+                </div>
+
+                <select
+                  value={
+                    grades[subject] || ""
+                  }
+                  onChange={(e) =>
+                    setGrades({
+                      ...grades,
+                      [subject]: Number(
+                        e.target.value
+                      ),
+                    })
+                  }
+                >
+                  <option value="">
+                    Grade
                   </option>
-                ))}
-              </select>
-            </div>
-          ))}
+
+                  {[...Array(10)].map(
+                    (_, i) => (
+                      <option
+                        key={i + 1}
+                        value={i + 1}
+                      >
+                        {i + 1}
+                      </option>
+                    )
+                  )}
+                </select>
+              </div>
+            )
+          )}
         </div>
 
-        {/* Previous CGPAs */}
         <div className="card">
-          <h2>Previous Semester CGPAs</h2>
+          <h2>
+            Previous Semester CGPAs
+          </h2>
+
           <div className="cgpa-grid">
-            {previousCgpas.map((_, i) => (
-              <input
-                key={i}
-                type="number"
-                step="0.01"
-                placeholder={`Sem ${i + 1}`}
-                onChange={(e) => {
-                  const updated = [...previousCgpas];
-                  updated[i] = Number(e.target.value);
-                  setPreviousCgpas(updated);
-                }}
-              />
-            ))}
+            {previousCgpas.map(
+              (_, i) => (
+                <input
+                  key={i}
+                  type="number"
+                  step="0.01"
+                  value={
+                    previousCgpas[i] || ""
+                  }
+                  placeholder={`Sem ${
+                    i + 1
+                  }`}
+                  onChange={(e) => {
+                    const updated = [
+                      ...previousCgpas,
+                    ];
+
+                    updated[i] = Number(
+                      e.target.value
+                    );
+
+                    setPreviousCgpas(
+                      updated
+                    );
+                  }}
+                />
+              )
+            )}
           </div>
         </div>
 
-        {/* Button */}
-        <button onClick={calculateCGPA}>Calculate CGPA</button>
+        <button onClick={calculateCGPA}>
+          Calculate CGPA
+        </button>
 
-        {/* Result */}
         {result && (
           <div className="card result">
-            <p>Total Credits: {result.totalCredits}</p>
             <p>
-              Current Semester CGPA: {result.semesterCgpa.toFixed(2)}
+              Total Credits:{" "}
+              {result.totalCredits}
             </p>
+
             <p>
-              Cumulative CGPA: {result.cumulativeCgpa.toFixed(2)}
+              Current Semester CGPA:{" "}
+              {result.semesterCgpa.toFixed(
+                2
+              )}
+            </p>
+
+            <p>
+              Cumulative CGPA:{" "}
+              {result.cumulativeCgpa.toFixed(
+                2
+              )}
             </p>
           </div>
         )}
