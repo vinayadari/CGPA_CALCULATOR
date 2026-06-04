@@ -14,7 +14,7 @@ const subjects = {
 
 export default function App() {
   const [grades, setGrades] = useState({});
-  const [previousCgpas, setPreviousCgpas] = useState([0, 0, 0, 0]);
+  const [previousCgpas, setPreviousCgpas] = useState([0, 0, 0, 0, 0]);
   const [result, setResult] = useState(null);
 
   const calculateCGPA = () => {
