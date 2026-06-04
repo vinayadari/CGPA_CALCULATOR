@@ -1,16 +1,15 @@
 import { useState } from "react";
 
 const subjects = {
-  "SEPM": 3,
-  "DAA": 3,
-  "DBMS": 3,
-  "Cloud Computing": 3,
-  "Mini Project": 1,
-  "DAA Lab": 1,
-  "DBMS Lab": 1,
-  "Environmental Studies": 1,
-  "Research Methodology & IPR": 2,
-  "SDK": 1,
+  "Data Mining and Machine Learning": 3,
+  "Computer Networks": 3,
+  "Cyber Security Essentials": 2,
+  "Cloud Architecture Design & Security": 3,
+  "Project Phase-I": 2,
+  "Data Visualization Tools": 1,
+  "Data Mining and Machine Learning Lab": 1,
+  "Network Simulation Lab": 1,
+  "Data Analytics Using R Programming": 3,
 };
 
 export default function App() {
