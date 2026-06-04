@@ -59,7 +59,7 @@ export default function App() {
     const semesterCgpa = weightedSum / totalCredits;
 
     const cumulativeCgpa =
-      (previousCgpas.reduce((a, b) => a + b, 0) +
+      (previousCgpas.reduce((a, b) => a + Number(b || 0), 0) +
         semesterCgpa) /
       6;
 
@@ -69,6 +69,17 @@ export default function App() {
       cumulativeCgpa,
     });
   };
+
+  useEffect(() => {
+    const hasGrades = Object.keys(grades).length > 0;
+    const hasCgpas = previousCgpas.some(
+      (cgpa) => Number(cgpa) > 0
+    );
+
+    if (hasGrades || hasCgpas) {
+      calculateCGPA();
+    }
+  }, [grades, previousCgpas]);
 
   return (
     <>
@@ -226,9 +237,12 @@ export default function App() {
                       ...previousCgpas,
                     ];
 
-                    updated[i] = Number(
-                      e.target.value
-                    );
+                    updated[i] =
+                      e.target.value === ""
+                        ? 0
+                        : Number(
+                            e.target.value
+                          );
 
                     setPreviousCgpas(
                       updated
