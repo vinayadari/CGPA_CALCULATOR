@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 const subjects = {
   "Data Mining and Machine Learning": 3,
   "Computer Networks": 3,
-  "Cyber Security Essentials": 2,
+  "Cyber Security Essentials": 3,
   "Cloud Architecture Design & Security": 3,
   "Project Phase-I": 2,
   "Data Visualization Tools": 1,
