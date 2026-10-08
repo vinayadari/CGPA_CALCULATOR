@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 
 const subjects = {
-  "Data Mining and Machine Learning": 3,
-  "Computer Networks": 3,
-  "Cyber Security Essentials": 3,
-  "Cloud Architecture Design & Security": 3,
-  "Project Phase-I": 2,
-  "Data Visualization Tools": 1,
-  "Data Mining and Machine Learning Lab": 1,
-  "Network Simulation Lab": 1,
-  "Data Analytics Using R Programming": 3,
+  "Full Stack Technologies": 3,
+  "Full Stack Technologies Lab": 1,
+  "Software Testing": 3,
+  "Software Testing Lab": 1,
+  "Generative AI": 3,
+  "Project Phase-II": 10,
+  "SAP Signavio": 3,
 };
 
 export default function App() {
@@ -20,7 +18,7 @@ export default function App() {
 
   const [previousCgpas, setPreviousCgpas] = useState(() => {
     const saved = localStorage.getItem("previousCgpas");
-    return saved ? JSON.parse(saved) : [0, 0, 0, 0, 0];
+    return saved ? JSON.parse(saved) : [0, 0, 0, 0, 0, 0];
   });
 
   const [result, setResult] = useState(() => {
@@ -52,16 +50,21 @@ export default function App() {
 
     Object.entries(subjects).forEach(([subject, credits]) => {
       const grade = grades[subject] || 0;
+
       totalCredits += credits;
       weightedSum += credits * grade;
     });
 
-    const semesterCgpa = weightedSum / totalCredits;
+    const semesterCgpa =
+      weightedSum / totalCredits;
+
+    const previousTotal = previousCgpas.reduce(
+      (sum, cgpa) => sum + Number(cgpa || 0),
+      0
+    );
 
     const cumulativeCgpa =
-      (previousCgpas.reduce((a, b) => a + Number(b || 0), 0) +
-        semesterCgpa) /
-      6;
+      (previousTotal + semesterCgpa) / 7;
 
     setResult({
       totalCredits,
@@ -71,10 +74,13 @@ export default function App() {
   };
 
   useEffect(() => {
-    const hasGrades = Object.keys(grades).length > 0;
-    const hasCgpas = previousCgpas.some(
-      (cgpa) => Number(cgpa) > 0
-    );
+    const hasGrades =
+      Object.keys(grades).length > 0;
+
+    const hasCgpas =
+      previousCgpas.some(
+        (cgpa) => Number(cgpa) > 0
+      );
 
     if (hasGrades || hasCgpas) {
       calculateCGPA();
@@ -99,6 +105,13 @@ export default function App() {
 
         h1 {
           text-align: center;
+          margin-bottom: 24px;
+        }
+
+        .subtitle {
+          text-align: center;
+          color: #94a3b8;
+          margin-top: -16px;
           margin-bottom: 24px;
         }
 
@@ -135,6 +148,15 @@ export default function App() {
           border-radius: 6px;
         }
 
+        select {
+          width: 100px;
+        }
+
+        input {
+          width: 100%;
+          box-sizing: border-box;
+        }
+
         button {
           width: 100%;
           padding: 12px;
@@ -152,20 +174,52 @@ export default function App() {
 
         .cgpa-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          grid-template-columns:
+            repeat(auto-fit, minmax(120px, 1fr));
           gap: 12px;
         }
 
         .result p {
-          margin: 6px 0;
+          margin: 8px 0;
+        }
+
+        .result strong {
+          color: #60a5fa;
+        }
+
+        .total {
+          border-top: 1px solid #334155;
+          margin-top: 15px;
+          padding-top: 15px;
+          color: #94a3b8;
+        }
+
+        @media (max-width: 600px) {
+          .row {
+            flex-wrap: wrap;
+          }
+
+          .subject {
+            flex-basis: 100%;
+          }
+
+          .credits {
+            text-align: left;
+          }
         }
       `}</style>
 
       <div className="container">
-        <h1>CGPA Calculator</h1>
 
+        <h1>VII Semester CGPA Calculator</h1>
+
+        <div className="subtitle">
+          B.E. Computer Science & Engineering
+        </div>
+
+        {/* SUBJECTS */}
         <div className="card">
-          <h2>Subjects</h2>
+          <h2>VII Semester Subjects</h2>
 
           {Object.entries(subjects).map(
             ([subject, credits]) => (
@@ -178,19 +232,20 @@ export default function App() {
                 </div>
 
                 <div className="credits">
-                  {credits}
+                  {credits} Credits
                 </div>
 
                 <select
-                  value={
-                    grades[subject] || ""
-                  }
+                  value={grades[subject] || ""}
                   onChange={(e) =>
                     setGrades({
                       ...grades,
-                      [subject]: Number(
-                        e.target.value
-                      ),
+                      [subject]:
+                        e.target.value === ""
+                          ? 0
+                          : Number(
+                              e.target.value
+                            ),
                     })
                   }
                 >
@@ -212,12 +267,15 @@ export default function App() {
               </div>
             )
           )}
+
+          <div className="total">
+            Total Semester Credits: <strong>24</strong>
+          </div>
         </div>
 
+        {/* PREVIOUS CGPAS */}
         <div className="card">
-          <h2>
-            Previous Semester CGPAs
-          </h2>
+          <h2>Previous Semester CGPAs</h2>
 
           <div className="cgpa-grid">
             {previousCgpas.map(
@@ -225,13 +283,13 @@ export default function App() {
                 <input
                   key={i}
                   type="number"
+                  min="0"
+                  max="10"
                   step="0.01"
                   value={
                     previousCgpas[i] || ""
                   }
-                  placeholder={`Sem ${
-                    i + 1
-                  }`}
+                  placeholder={`Sem ${i + 1}`}
                   onChange={(e) => {
                     const updated = [
                       ...previousCgpas,
@@ -254,32 +312,39 @@ export default function App() {
           </div>
         </div>
 
+        {/* CALCULATE */}
         <button onClick={calculateCGPA}>
           Calculate CGPA
         </button>
 
+        {/* RESULT */}
         {result && (
           <div className="card result">
+            <h2>Result</h2>
+
             <p>
               Total Credits:{" "}
-              {result.totalCredits}
+              <strong>
+                {result.totalCredits}
+              </strong>
             </p>
 
             <p>
-              Current Semester CGPA:{" "}
-              {result.semesterCgpa.toFixed(
-                2
-              )}
+              VII Semester CGPA:{" "}
+              <strong>
+                {result.semesterCgpa.toFixed(2)}
+              </strong>
             </p>
 
             <p>
               Cumulative CGPA:{" "}
-              {result.cumulativeCgpa.toFixed(
-                2
-              )}
+              <strong>
+                {result.cumulativeCgpa.toFixed(2)}
+              </strong>
             </p>
           </div>
         )}
+
       </div>
     </>
   );
