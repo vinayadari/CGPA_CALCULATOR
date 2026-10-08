@@ -16,9 +16,20 @@ export default function App() {
     return saved ? JSON.parse(saved) : {};
   });
 
+  // Always maintain exactly 6 previous semesters
   const [previousCgpas, setPreviousCgpas] = useState(() => {
     const saved = localStorage.getItem("previousCgpas");
-    return saved ? JSON.parse(saved) : [0, 0, 0, 0, 0, 0];
+
+    if (saved) {
+      const parsed = JSON.parse(saved);
+
+      return Array.from(
+        { length: 6 },
+        (_, i) => Number(parsed[i] || 0)
+      );
+    }
+
+    return [0, 0, 0, 0, 0, 0];
   });
 
   const [result, setResult] = useState(() => {
@@ -27,7 +38,10 @@ export default function App() {
   });
 
   useEffect(() => {
-    localStorage.setItem("grades", JSON.stringify(grades));
+    localStorage.setItem(
+      "grades",
+      JSON.stringify(grades)
+    );
   }, [grades]);
 
   useEffect(() => {
@@ -48,20 +62,24 @@ export default function App() {
     let totalCredits = 0;
     let weightedSum = 0;
 
-    Object.entries(subjects).forEach(([subject, credits]) => {
-      const grade = grades[subject] || 0;
+    Object.entries(subjects).forEach(
+      ([subject, credits]) => {
+        const grade = grades[subject] || 0;
 
-      totalCredits += credits;
-      weightedSum += credits * grade;
-    });
+        totalCredits += credits;
+        weightedSum += credits * grade;
+      }
+    );
 
     const semesterCgpa =
       weightedSum / totalCredits;
 
-    const previousTotal = previousCgpas.reduce(
-      (sum, cgpa) => sum + Number(cgpa || 0),
-      0
-    );
+    const previousTotal =
+      previousCgpas.reduce(
+        (sum, cgpa) =>
+          sum + Number(cgpa || 0),
+        0
+      );
 
     const cumulativeCgpa =
       (previousTotal + semesterCgpa) / 7;
@@ -105,13 +123,12 @@ export default function App() {
 
         h1 {
           text-align: center;
-          margin-bottom: 24px;
+          margin-bottom: 8px;
         }
 
         .subtitle {
           text-align: center;
           color: #94a3b8;
-          margin-top: -16px;
           margin-bottom: 24px;
         }
 
@@ -125,18 +142,27 @@ export default function App() {
         .row {
           display: flex;
           align-items: center;
-          gap: 12px;
-          margin-bottom: 10px;
+          gap: 16px;
+          margin-bottom: 12px;
+          min-height: 42px;
         }
 
         .subject {
           flex: 1;
+          font-size: 16px;
         }
 
         .credits {
-          width: 60px;
+          width: 70px;
+          min-width: 70px;
           text-align: center;
-          opacity: 0.7;
+          color: #94a3b8;
+          font-size: 14px;
+        }
+
+        .grade-select {
+          width: 105px;
+          flex-shrink: 0;
         }
 
         select,
@@ -144,12 +170,12 @@ export default function App() {
           background: #020617;
           border: 1px solid #334155;
           color: #e5e7eb;
-          padding: 6px 10px;
+          padding: 8px 10px;
           border-radius: 6px;
         }
 
         select {
-          width: 100px;
+          cursor: pointer;
         }
 
         input {
@@ -175,7 +201,7 @@ export default function App() {
         .cgpa-grid {
           display: grid;
           grid-template-columns:
-            repeat(auto-fit, minmax(120px, 1fr));
+            repeat(6, 1fr);
           gap: 12px;
         }
 
@@ -189,14 +215,26 @@ export default function App() {
 
         .total {
           border-top: 1px solid #334155;
-          margin-top: 15px;
-          padding-top: 15px;
+          margin-top: 16px;
+          padding-top: 16px;
           color: #94a3b8;
         }
 
-        @media (max-width: 600px) {
+        .total strong {
+          color: #60a5fa;
+        }
+
+        @media (max-width: 750px) {
+          .cgpa-grid {
+            grid-template-columns:
+              repeat(3, 1fr);
+          }
+        }
+
+        @media (max-width: 500px) {
           .row {
             flex-wrap: wrap;
+            gap: 8px;
           }
 
           .subject {
@@ -205,6 +243,11 @@ export default function App() {
 
           .credits {
             text-align: left;
+          }
+
+          .cgpa-grid {
+            grid-template-columns:
+              repeat(2, 1fr);
           }
         }
       `}</style>
@@ -217,7 +260,8 @@ export default function App() {
           B.E. Computer Science & Engineering
         </div>
 
-        {/* SUBJECTS */}
+        {/* VII SEMESTER SUBJECTS */}
+
         <div className="card">
           <h2>VII Semester Subjects</h2>
 
@@ -232,11 +276,14 @@ export default function App() {
                 </div>
 
                 <div className="credits">
-                  {credits} Credits
+                  {credits} Cr
                 </div>
 
                 <select
-                  value={grades[subject] || ""}
+                  className="grade-select"
+                  value={
+                    grades[subject] || ""
+                  }
                   onChange={(e) =>
                     setGrades({
                       ...grades,
@@ -253,13 +300,14 @@ export default function App() {
                     Grade
                   </option>
 
-                  {[...Array(10)].map(
-                    (_, i) => (
+                  {/* 10 → 1 */}
+                  {[10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(
+                    (grade) => (
                       <option
-                        key={i + 1}
-                        value={i + 1}
+                        key={grade}
+                        value={grade}
                       >
-                        {i + 1}
+                        {grade}
                       </option>
                     )
                   )}
@@ -269,11 +317,13 @@ export default function App() {
           )}
 
           <div className="total">
-            Total Semester Credits: <strong>24</strong>
+            Total Semester Credits:{" "}
+            <strong>24</strong>
           </div>
         </div>
 
-        {/* PREVIOUS CGPAS */}
+        {/* PREVIOUS SEMESTER CGPAS */}
+
         <div className="card">
           <h2>Previous Semester CGPAs</h2>
 
@@ -313,11 +363,13 @@ export default function App() {
         </div>
 
         {/* CALCULATE */}
+
         <button onClick={calculateCGPA}>
           Calculate CGPA
         </button>
 
         {/* RESULT */}
+
         {result && (
           <div className="card result">
             <h2>Result</h2>
@@ -344,7 +396,6 @@ export default function App() {
             </p>
           </div>
         )}
-
       </div>
     </>
   );
